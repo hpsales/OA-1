@@ -2,7 +2,14 @@ import React, { Component } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 // import { renderRoutes } from 'react-router-config';
 import Loadable from 'react-loadable';
+import intl from 'react-intl-universal';
 import './App.scss';
+
+// locale data
+const locales = {
+  "en-US": require('./locales/en-US.js'),
+  "zh-CN": require('./locales/zh-CN.js'),
+};
 
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
 
@@ -34,9 +41,28 @@ const Page500 = Loadable({
 });
 
 class App extends Component {
+  state = {initDone: false}
+
+  componentDidMount() {
+    this.loadLocales();
+  }
+
+  loadLocales() {
+    // init method will load CLDR locale data according to currentLocale
+    // react-intl-universal is singleton, so you should init it only once in your app
+    intl.init({
+      currentLocale: 'zh-CN', // TODO: determine locale here
+      locales,
+    })
+    .then(() => {
+      // After loading CLDR locale data, start to render
+	  this.setState({initDone: true});
+    });
+  }
 
   render() {
     return (
+      this.state.initDone &&
       <HashRouter>
           <Switch>
             <Route exact path="/login" name="Login Page" component={Login} />
